@@ -9,6 +9,7 @@ local died = false
 local pingeonsTable = {}
 local balloonsTable = {}
 local musicTrack
+local increasingDificult = 1
 
 -- Set up display groups
 local backGroup = display.newGroup()  -- Display group for the background image
@@ -104,6 +105,7 @@ local function createPingeon()
 end
 
 local function createBallon()
+  increasingDificult = increasingDificult + 0.05
   local balloon = display.newImageRect( mainGroup, "balloon.png", 102, 85)
   table.insert(balloonsTable, balloon)
   physics.addBody( balloon, "dynamic", { isSensor=true })
@@ -112,12 +114,21 @@ local function createBallon()
   -- from the left
   balloon.x = math.random( 30, display.contentWidth - 30 )
   balloon.y = display.contentHeight + 99
-  balloon:setLinearVelocity( 0, -50 )
+  balloon:setLinearVelocity( 0,( increasingDificult * -50 ) )
 
 end
 
 local function gameLoop()
   createPingeon()
+  if (increasingDificult >= 3) then
+    createPingeon()
+  end 
+  if (increasingDificult >= 5) then
+    createPingeon()
+  end
+  if (increasingDificult >= 7) then
+    createPingeon()
+  end
 
   if (lives <= 0) then
     timer.performWithDelay(1000, endGame)
@@ -139,6 +150,15 @@ end
 
 local function ballonLoopTimer() 
   createBallon()
+  if (increasingDificult >= 2) then
+    createBallon()
+  end 
+  if (increasingDificult >= 4) then
+    createBallon()
+  end
+  if (increasingDificult >= 6) then
+    createBallon()
+  end
 
   for i = #balloonsTable, 1, -1 do
     local thisballoon = balloonsTable[i]
@@ -152,10 +172,6 @@ local function ballonLoopTimer()
       end
 end
 
-ballonLoopTimer = timer.performWithDelay( 2000, ballonLoopTimer, 0 )
-gameLoopTimer = timer.performWithDelay( 800, gameLoop, 0 )
-
-
 -- create()
 function scene:create( event )
   musicTrack = audio.loadStream( "./sounds/forest.wav" )
@@ -166,15 +182,16 @@ function scene:show( event )
 
 	local sceneGroup = self.view
   local phase = event.phase
-  audio.play( musicTrack, { channel=1, loops=-1 } )
+  
 
 	if ( phase == "will" ) then
 		-- Code here runs when the scene is still off screen (but is about to come on screen)
 
-	elseif ( phase == "did" ) then
-     -- Code here runs when the scene is entirely on screen
-
-       	physics.start()
+  elseif ( phase == "did" ) then
+    audio.play( musicTrack, { channel=1, loops=-1 } )
+    ballonLoopTimer = timer.performWithDelay( 2000 , ballonLoopTimer, 0 )
+    gameLoopTimer = timer.performWithDelay( 800, gameLoop, 0 )
+    physics.start()
         
 	end
 end
