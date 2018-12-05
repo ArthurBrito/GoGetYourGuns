@@ -15,6 +15,7 @@ local fireSound
 local json = require("json")
  
 local scoresTable = {}
+local menuButton
  
 local filePath = system.pathForFile("highscores.json", system.DocumentsDirectory)
 
@@ -46,11 +47,11 @@ local function saveScores()
     end
 end
 
-local function gotoMenu()
-	
-	audio.play(fireSound)
-    composer.gotoScene( "menu", { time=500, effect="crossFade" } )
-end
+local function menu()
+    composer.removeScene("highscores")
+    composer.gotoScene("menu", {time=500, effect="crossFade"})
+    
+  end
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
@@ -64,6 +65,8 @@ function scene:create( event )
  
     -- Insert the saved score from the last game into the table, then reset it
     table.insert( scoresTable, composer.getVariable( "score" ) )
+    fireSound = audio.loadSound( "sounds/click-tick.wav" )
+
     composer.setVariable( "score", 0 )
  
     -- Sort the table entries from highest to lowest
@@ -74,7 +77,7 @@ function scene:create( event )
  
     saveScores()
  
-    local background = display.newImageRect( sceneGroup, "highscore.jpg", display.contentWidth, display.contentHeight)
+    local background = display.newImageRect( sceneGroup, "blackground.jpg", display.contentWidth, display.contentHeight)
     background.x = display.contentCenterX
     background.y = display.contentCenterY
  
@@ -83,7 +86,7 @@ function scene:create( event )
 	    color1={ 1, 1, 0 }, color2={ 0.8, 0.8, 0.8 }, direction="up"
 	}
 
-    local highScoreHeader = display.newText( sceneGroup, "HighScores", display.contentCenterX, 50, native.systemFontBold, 44 )
+    local highScoreHeader = display.newText( sceneGroup, "HighScores", display.contentCenterX, 70, native.systemFontBold, 44 )
     highScoreHeader:setFillColor(gradient)
  
     for i = 1, 10 do
@@ -96,15 +99,15 @@ function scene:create( event )
   
             local thisScore = display.newText( sceneGroup, scoresTable[i], display.contentCenterX-30, yPos, native.systemFont, 36 )
             thisScore.anchorX = 0
-            thisScore:setFillColor( 0,0,0 )
+            thisScore:setFillColor( 1,1,0 )
         end
     end
  
-    local menuButton = display.newText( "Menu", display.contentCenterX, 725, native.systemFontBold, 44 )
-    menuButton:setFillColor(gradient)
-    menuButton:addEventListener( "tap", gotoMenu )
+    menuButton = display.newImageRect(sceneGroup, "back-button.png", 40, 40)
+    menuButton.x = 30
+    menuButton.y = 30
+    menuButton:addEventListener( "tap", menu )
 
-    fireSound = audio.loadSound( "sounds/click-tick.wav" )
 end
 
 function scene:show( event )
@@ -121,7 +124,6 @@ function scene:show( event )
 	end
 end
 
-
 -- hide()
 function scene:hide( event )
 
@@ -137,15 +139,13 @@ function scene:hide( event )
 	end
 end
 
-
 -- destroy()
 function scene:destroy( event )
 
-	local sceneGroup = self.view
-	-- Code here runs prior to the removal of scene's view
-	--audio.dispose( soundHighscore )
-end
+    local sceneGroup = self.view
+    Runtime:removeEventListener("tap", menuButton)
 
+end
 
 -- -----------------------------------------------------------------------------------
 -- Scene event function listeners
