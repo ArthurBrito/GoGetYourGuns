@@ -7,7 +7,7 @@ local scene = composer.newScene()
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
 
-local clickTick = audio.loadSound( "sounds/click-tick.wav" )
+local clickTick
 local musicTrack
 
 local function gotoGame()
@@ -22,17 +22,6 @@ local function gotoHighScores()
   composer.gotoScene("highscores", {time=500, effect="crossFade"})
 end
 
-local function gotoInstrucoes()
-	-- audio.play(clickTick)
-	-- composer.removeScene("instrucoes")
-	-- composer.gotoScene("instrucoes", {time=500, effect="crossFade"})
-end
-
-local function gotoSobre()
-	-- audio.play(clickTick)
-	-- composer.removeScene("sobre")
-	-- composer.gotoScene("sobre", {time=500, effect="crossFade"})
-end
 -- -----------------------------------------------------------------------------------
 -- Scene event functions
 -- -----------------------------------------------------------------------------------
@@ -40,7 +29,8 @@ end
 -- create()
 function scene:create( event )
 	display.setStatusBar( display.HiddenStatusBar )
-	musicTrack = audio.loadStream( "./sounds/begining-adventure.wav" )
+	musicTrack = audio.loadStream( "sounds/begining-adventure.mp3" )
+	clickTick = audio.loadSound( "sounds/click-tick.wav" )
 
 	local sceneGroup = self.view
 	local background = display.newImageRect( sceneGroup, "sky_background.png", display.contentWidth, display.contentHeight)	
@@ -61,29 +51,22 @@ function scene:create( event )
 	local highScoresButton = display.newText( sceneGroup, "HighScore", display.contentCenterX, 280, native.systemFontBold, 35 )
 	highScoresButton:setFillColor( gradient )
 
-	local instrucoesButton = display.newText( sceneGroup, "Instructions", display.contentCenterX, 360, native.systemFontBold, 35 )
-	instrucoesButton:setFillColor( gradient )
-
-	local sobreButton = display.newText( sceneGroup, "About", display.contentCenterX, 440, native.systemFontBold, 35 )
-	sobreButton:setFillColor( gradient )
-
 	playButton:addEventListener( "tap", gotoGame )
 	highScoresButton:addEventListener( "tap", gotoHighScores )
-	instrucoesButton:addEventListener("tap", gotoInstrucoes)
-	sobreButton:addEventListener( "tap", gotoSobre)
 
 end
 
-
 -- show()
 function scene:show( event )
-	audio.play( musicTrack, { channel=1, loops=-1 } )
 
 	local sceneGroup = self.view
 	local phase = event.phase
 
-end
+	if ( phase == "did" ) then
+		audio.play( musicTrack, { channel=1, loops=-1 } )
+	end
 
+end
 
 -- hide()
 function scene:hide( event )
